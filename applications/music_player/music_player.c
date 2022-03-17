@@ -8,22 +8,20 @@
 typedef enum {
     // Delay
     N = 0,
-    a3f = 208,     // 208 Hz
-    b3f = 233,     // 233 Hz
-    b3 = 247,      // 247 Hz
-    c4 = 261,      // 261 Hz MIDDLE C
-    c4s = 277,     // 277 Hz
-    e4f = 311,     // 311 Hz    
-    f4 = 349,      // 349 Hz 
-    a4f = 415,     // 415 Hz  
-    b4f = 466,     // 466 Hz 
-    b4 = 493,      // 493 Hz 
-    c5 = 523,      // 523 Hz 
-    c5s = 554,     // 554 Hz
-    e5f = 622,     // 622 Hz  
-    f5 = 698,      // 698 Hz 
-    f5s = 740,     // 740 Hz
-    a5f = 831,     // 831 Hz 
+    // Octave 4
+    B4 = 494,
+    // Octave 5
+    C5 = 523,
+    D5 = 587,
+    E5 = 659,
+    F_5 = 740,
+    G5 = 784,
+    A5 = 880,
+    B5 = 988,
+    // Octave 6
+    C6 = 1046,
+    D6 = 1175,
+    E6 = 1319,
 } MelodyEventNote;
 
 typedef enum {
