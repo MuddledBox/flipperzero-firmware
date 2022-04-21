@@ -3,103 +3,6 @@
 #include "subghz_i.h"
 #include <lib/toolbox/path.h>
 
-// Frequency bands supported: 
-// 300-348 MHz
-// 387-464 MHz 
-// 779-928 MHz
-// Do not add anything out of range or device soft locks
-
-const char* const subghz_frequencies_text[] = {
-    "300.00",
-    "302.76",
-    "303.88",
-    "304.25",
-    "310.00",
-    "313.85",
-    "315.00",
-    "318.00",
-    "348.00",
-    "387.00",
-    "390.00",
-    "418.00",
-    "433.08",
-    "433.22",
-    "433.42",
-    "433.92",
-    "434.42",
-    "434.78",
-    "438.90",
-    "464.00",
-    "779.00",
-    "868.35",
-    "915.00",
-    "925.00",
-    "928.00",
-};
-
-const uint32_t subghz_frequencies[] = {
-    300000000,
-    302757000, /* FCC ID N6U303NTX */
-    303875000,
-    304250000, /* Ceiling Fan - Harbor Breeze*/
-    310000000,
-    313850000, /* 2007 Honda Key */
-    315000000,
-    318000000,
-    348000000,
-    387000000,
-    390000000,
-    418000000,
-    433075000, /* LPD433 first */
-    433220000, /* 2016-2020 Honda */ 
-    433420000,
-    433920000, /* LPD433 mid */
-    434420000,
-    434775000, /* LPD433 last channels */
-    438900000,
-    464000000,
-    779000000,
-    868350000,
-    915000000,
-    925000000,
-    928000000,
-};
-
-const uint32_t subghz_hopper_frequencies[] = {
-    300000000,
-    302757000, /* FCC ID N6U303NTX */
-    303875000,
-    304250000,
-    310000000,
-    313850000, /* 2007 Honda Key */
-    315000000,
-    318000000,
-    348000000,
-    387000000,
-    390000000,
-    418000000,
-    433075000, /* LPD433 first */
-    433220000, /* 2016-2020 Honda */ 
-    433420000,
-    433920000, /* LPD433 mid */
-    434420000,
-    434775000, /* LPD433 last channels */
-    438900000,
-    464000000,
-    779000000,
-    868350000,
-    915000000,
-    925000000,
-    928000000,
-};
-
-const uint32_t subghz_frequencies_count = sizeof(subghz_frequencies) / sizeof(uint32_t);
-const uint32_t subghz_hopper_frequencies_count =
-    sizeof(subghz_hopper_frequencies) / sizeof(uint32_t);
-
-const uint32_t subghz_frequencies_433_92 = 15;
-const uint32_t subghz_frequencies_315_00 = 6;
-
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     SubGhz* subghz = context;
@@ -221,9 +124,13 @@ SubGhz* subghz_alloc() {
         SubGhzViewIdStatic,
         subghz_test_static_get_view(subghz->subghz_test_static));
 
+    //init setting
+    subghz->setting = subghz_setting_alloc();
+    subghz_setting_load(subghz->setting, "/ext/subghz/assets/setting_user");
+
     //init Worker & Protocol & History
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
-    subghz->txrx->frequency = subghz_frequencies[subghz_frequencies_433_92];
+    subghz->txrx->frequency = subghz_setting_get_default_frequency(subghz->setting);
     subghz->txrx->preset = FuriHalSubGhzPresetOok650Async;
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz->txrx->hopper_state = SubGhzHopperStateOFF;
@@ -315,6 +222,9 @@ void subghz_free(SubGhz* subghz) {
     // GUI
     furi_record_close("gui");
     subghz->gui = NULL;
+
+    //setting
+    subghz_setting_free(subghz->setting);
 
     //Worker & Protocol & History
     subghz_receiver_free(subghz->txrx->receiver);

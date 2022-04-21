@@ -246,7 +246,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             break;
         }
 
-        if(!flipper_format_read_uint32(fff_data_file, "Frequency", (uint32_t*)&temp_data32, 1)) {
+        if(!flipper_format_read_uint32(fff_data_file, "Frequency", &temp_data32, 1)) {
             FURI_LOG_E(TAG, "Missing Frequency");
             break;
         }
@@ -279,8 +279,13 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path) {
             //if RAW
             string_t file_name;
             string_init(file_name);
+            string_t path;
+            string_init(path);
             path_extract_filename_no_ext(file_path, file_name);
-            subghz_protocol_raw_gen_fff_data(subghz->txrx->fff_data, string_get_cstr(file_name));
+            path_extract_dirname(file_path, path);
+            subghz_protocol_raw_gen_fff_data(
+                subghz->txrx->fff_data, string_get_cstr(path), string_get_cstr(file_name));
+            string_clear(path);
             string_clear(file_name);
 
         } else {
@@ -514,9 +519,9 @@ void subghz_hopper_update(SubGhz* subghz) {
     } else {
         subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
     }
-
     // Select next frequency
-    if(subghz->txrx->hopper_idx_frequency < subghz_hopper_frequencies_count - 1) {
+    if(subghz->txrx->hopper_idx_frequency <
+       subghz_setting_get_hopper_frequency_count(subghz->setting) - 1) {
         subghz->txrx->hopper_idx_frequency++;
     } else {
         subghz->txrx->hopper_idx_frequency = 0;
@@ -527,7 +532,8 @@ void subghz_hopper_update(SubGhz* subghz) {
     };
     if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_receiver_reset(subghz->txrx->receiver);
-        subghz->txrx->frequency = subghz_hopper_frequencies[subghz->txrx->hopper_idx_frequency];
+        subghz->txrx->frequency = subghz_setting_get_hopper_frequency(
+            subghz->setting, subghz->txrx->hopper_idx_frequency);
         subghz_rx(subghz, subghz->txrx->frequency);
     }
 }
