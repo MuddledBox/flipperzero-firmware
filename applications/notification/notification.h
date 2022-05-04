@@ -50,15 +50,17 @@ typedef enum {
 
     NotificationMessageTypeDelay,
 
-    NotificationMessageTypeLedDisplay,
-    NotificationMessageTypeLedDisplayLock,
-    NotificationMessageTypeLedDisplayUnlock,
+    NotificationMessageTypeLedDisplayBacklight,
+    NotificationMessageTypeLedDisplayBacklightEnforceOn,
+    NotificationMessageTypeLedDisplayBacklightEnforceAuto,
 
     NotificationMessageTypeDoNotReset,
 
     NotificationMessageTypeForceSpeakerVolumeSetting,
     NotificationMessageTypeForceVibroSetting,
     NotificationMessageTypeForceDisplayBrightnessSetting,
+
+    NotificationMessageTypeLedBrightnessSettingApply,
 } NotificationMessageType;
 
 typedef struct {

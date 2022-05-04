@@ -70,7 +70,7 @@ static void backlight_changed(VariableItem* item) {
 
     variable_item_set_current_value_text(item, backlight_text[index]);
     app->notification->settings.display_brightness = backlight_value[index];
-    notification_message(app->notification, &sequence_display_on);
+    notification_message(app->notification, &sequence_display_backlight_on);
 }
 
 static void screen_changed(VariableItem* item) {
@@ -79,8 +79,16 @@ static void screen_changed(VariableItem* item) {
 
     variable_item_set_current_value_text(item, delay_text[index]);
     app->notification->settings.display_off_delay_ms = delay_value[index];
-    notification_message(app->notification, &sequence_display_on);
+    notification_message(app->notification, &sequence_display_backlight_on);
 }
+
+const NotificationMessage apply_message = {
+    .type = NotificationMessageTypeLedBrightnessSettingApply,
+};
+const NotificationSequence apply_sequence = {
+    &apply_message,
+    NULL,
+};
 
 static void led_changed(VariableItem* item) {
     NotificationAppSettings* app = variable_item_get_context(item);
@@ -88,6 +96,8 @@ static void led_changed(VariableItem* item) {
 
     variable_item_set_current_value_text(item, backlight_text[index]);
     app->notification->settings.led_brightness = backlight_value[index];
+    notification_message(app->notification, &apply_sequence);
+    notification_internal_message(app->notification, &apply_sequence);
     notification_message(app->notification, &sequence_blink_white_100);
 }
 

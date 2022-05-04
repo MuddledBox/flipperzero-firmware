@@ -238,27 +238,15 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     if(thread_state == FuriThreadStateRunning) {
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader_instance->pubsub, &event);
-        furi_hal_power_insomnia_enter();
 
-        // Snapshot current memory usage
-        instance->free_heap_size = memmgr_get_free_heap();
+        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+            furi_hal_power_insomnia_enter();
+        }
     } else if(thread_state == FuriThreadStateStopped) {
-        /*
-         * Current Leak Sanitizer assumes that memory is allocated and freed
-         * inside one thread. Timers are allocated in one task, but freed in
-         * Timer-Task thread, and xTimerDelete() just put command to queue.
-         * To avoid some bad cases there are few fixes:
-         * 1) delay for Timer to process commands
-         * 2) there are 'heap diff' which shows difference in heap before task
-         * started and after task completed. In process of leakage monitoring
-         * both values should be taken into account.
-         */
-        furi_hal_delay_ms(20);
-        int heap_diff = instance->free_heap_size - memmgr_get_free_heap();
         FURI_LOG_I(
             TAG,
-            "Application thread stopped. Heap allocation balance: %d. Thread allocation balance: %d.",
-            heap_diff,
+            "Application thread stopped. Free heap: %d. Thread allocation balance: %d.",
+            memmgr_get_free_heap(),
             furi_thread_get_heap_size(instance->application_thread));
 
         if(loader_instance->application_arguments) {
@@ -266,7 +254,9 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
             loader_instance->application_arguments = NULL;
         }
 
-        furi_hal_power_insomnia_exit();
+        if(!loader_instance->application->flags & FlipperApplicationFlagInsomniaSafe) {
+            furi_hal_power_insomnia_exit();
+        }
         loader_unlock(instance);
 
         event.type = LoaderEventTypeApplicationStopped;

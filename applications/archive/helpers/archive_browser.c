@@ -77,6 +77,7 @@ void archive_set_item_count(ArchiveBrowserView* browser, uint32_t count) {
     with_view_model(
         browser->view, (ArchiveBrowserViewModel * model) {
             model->item_cnt = count;
+            model->item_idx = CLAMP(model->item_idx, model->item_cnt - 1, 0);
             return false;
         });
 }
@@ -391,28 +392,23 @@ void archive_enter_dir(ArchiveBrowserView* browser, string_t name) {
     furi_assert(browser);
     furi_assert(name);
 
-    uint8_t browser_depth = 0;
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
-            browser_depth = idx_last_array_size(model->idx_last);
-            return false;
-        });
-
-    if(browser_depth > BROWSER_DEPTH_MAX) {
+    if(string_size(name) >= (MAX_NAME_LEN - 1)) {
         return;
     }
 
     archive_dir_count_items(browser, string_get_cstr(name));
 
-    with_view_model(
-        browser->view, (ArchiveBrowserViewModel * model) {
-            idx_last_array_push_back(model->idx_last, model->item_idx);
-            model->array_offset = 0;
-            model->item_idx = 0;
-            return false;
-        });
+    if(string_cmp(browser->path, name) != 0) {
+        with_view_model(
+            browser->view, (ArchiveBrowserViewModel * model) {
+                idx_last_array_push_back(model->idx_last, model->item_idx);
+                model->array_offset = 0;
+                model->item_idx = 0;
+                return false;
+            });
 
-    string_set(browser->path, name);
+        string_set(browser->path, name);
+    }
 
     archive_switch_dir(browser, string_get_cstr(browser->path));
 }

@@ -9,6 +9,7 @@
 #include <forward_list>
 #include <stdint.h>
 #include <notification/notification_messages.h>
+#include <dialogs/dialogs.h>
 #include <infrared_worker.h>
 
 #include "scene/infrared_app_scene.h"
@@ -216,17 +217,16 @@ public:
     /** Play success notification */
     void notify_success();
     /** Play red blink notification */
-    void notify_red_blink();
+    void notify_blink_read();
     /** Light green */
     void notify_green_on();
     /** Disable green light */
     void notify_green_off();
-    /** Play click sound */
-    void notify_click();
-    /** Play click and green notification */
-    void notify_click_and_green_blink();
-    /** Blink green light */
-    void notify_blink_green();
+    /** Blink on send */
+    void notify_blink_send();
+
+    /** Get Dialogs instance */
+    DialogsApp* get_dialogs();
 
     /** Text input callback
  *
@@ -286,6 +286,8 @@ private:
 
     /** Notification instance */
     NotificationApp* notification;
+    /** Dialogs instance */
+    DialogsApp* dialogs;
     /** View manager instance */
     InfraredAppViewManager view_manager;
     /** Remote manager instance */

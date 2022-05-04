@@ -12,6 +12,8 @@ void furi_hal_init_early() {
 
     furi_hal_resources_init_early();
 
+    furi_hal_os_init();
+
     furi_hal_spi_init_early();
 
     furi_hal_i2c_init_early();
@@ -53,7 +55,6 @@ void furi_hal_init() {
     FURI_LOG_I(TAG, "Speaker OK");
 
     furi_hal_crypto_init();
-    furi_hal_crc_init(true);
 
     // USB
 #ifndef FURI_RAM_EXEC
@@ -74,9 +75,6 @@ void furi_hal_init() {
 #endif
     furi_hal_bt_init();
     furi_hal_compress_icon_init();
-
-    // FreeRTOS glue
-    furi_hal_os_init();
 
     // FatFS driver initialization
     MX_FATFS_Init();
